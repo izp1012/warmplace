@@ -1,0 +1,21 @@
+.footer {
+  margin-top: auto;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  height: 60px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-text {
+  color: var(--text-muted);
+  font-size: 14px;
+}

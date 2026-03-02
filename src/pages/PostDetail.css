@@ -1,0 +1,239 @@
+.post-detail {
+  flex: 1;
+  background: var(--background);
+}
+
+.post-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: var(--spacing-lg);
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--primary-dark);
+}
+
+.post-article {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 16px var(--shadow);
+  margin-bottom: var(--spacing-xl);
+}
+
+.post-images {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--secondary);
+}
+
+.post-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-nav:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav.prev {
+  left: var(--spacing-md);
+}
+
+.image-nav.next {
+  right: var(--spacing-md);
+}
+
+.image-dots {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dot.active {
+  background: white;
+  transform: scale(1.2);
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.post-content {
+  padding: var(--spacing-xl);
+}
+
+.post-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.post-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.post-author {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.post-body {
+  margin-bottom: var(--spacing-xl);
+}
+
+.post-body p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border);
+}
+
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.like-button:hover {
+  background: var(--secondary);
+}
+
+.like-button.liked {
+  color: #e74c3c;
+}
+
+.comments-section {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.comments-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-author-input {
+  max-width: 200px;
+}
+
+.comment-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.comment-submit {
+  align-self: flex-end;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--primary);
+  color: white;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.comment-submit:hover {
+  background: var(--primary-dark);
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-not-found {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 600px) {
+  .post-detail-container {
+    padding: var(--spacing-md);
+  }
+  
+  .post-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .post-title {
+    font-size: 22px;
+  }
+}
