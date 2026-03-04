@@ -11,8 +11,7 @@ export function Chat() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  
-  // WebSocket 식별자는 username 기준으로 통일
+
   const currentUserId = user?.username || user?.id?.toString() || '';
   const currentUserName = user?.nickname || user?.username || '';
   const {
@@ -44,7 +43,7 @@ export function Chat() {
     if (messages.length > 0 && !isOpen) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.senderId !== currentUserId) {
-        setUnreadCount(prev => prev + 1);
+        setUnreadCount((prev) => prev + 1);
       }
     }
   }, [messages, isOpen, currentUserId]);
@@ -63,38 +62,40 @@ export function Chat() {
       {isOpen && (
         <div className="chat-overlay">
           <div className="chat-modal">
-            <ChatSidebar 
+            <ChatSidebar
               conversations={conversations}
               selectedConversation={selectedConversation}
               onSelectConversation={handleSelectConversation}
-            />
-            <ChatPanel
               isGroupChat={isGroupChat}
               setIsGroupChat={setIsGroupChat}
-              messages={messages}
-              inputMessage={inputMessage}
-              setInputMessage={setInputMessage}
               receiverId={receiverId}
               setReceiverId={setReceiverId}
               roomId={roomId}
               setRoomId={setRoomId}
-              error={error}
-              isSending={isSending}
               receiverValidation={receiverValidation}
               isValidating={isValidating}
+              onReceiverKeyDown={handleReceiverKeyDown}
+              onRoomIdKeyDown={handleRoomIdKeyDown}
+              userSuggestions={filteredUserSuggestions}
+              onSelectUserSuggestion={(u: User) => {
+                setReceiverId(u.username);
+                setReceiverValidation('valid');
+                openDirectConversation(u.username);
+              }}
+            />
+            <ChatPanel
+              isGroupChat={isGroupChat}
+              messages={messages}
+              inputMessage={inputMessage}
+              setInputMessage={setInputMessage}
+              roomId={roomId}
+              error={error}
+              isSending={isSending}
               selectedConversation={selectedConversation}
               currentUserId={currentUserId}
               currentUserName={currentUserName}
               onSendMessage={sendMessage}
-              onReceiverKeyDown={handleReceiverKeyDown}
-              onRoomIdKeyDown={handleRoomIdKeyDown}
               onClose={() => setIsOpen(false)}
-              userSuggestions={filteredUserSuggestions}
-              onSelectUserSuggestion={(user: User) => {
-                setReceiverId('');
-                setReceiverValidation('valid');
-                openDirectConversation(user.username);
-              }}
             />
           </div>
         </div>

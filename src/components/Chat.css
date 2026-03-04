@@ -94,6 +94,35 @@
   text-align: center;
 }
 
+.chat-sidebar-add {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.chat-sidebar-mode {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.chat-sidebar-mode .mode-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.chat-sidebar-mode .mode-btn .mode-label {
+  margin-left: 4px;
+}
+
+.chat-sidebar-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
 .chat-conversation-list {
   flex: 1;
   overflow-y: auto;

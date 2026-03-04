@@ -1,58 +1,37 @@
 import { useRef, useEffect } from 'react';
-import { MessageCircle, Send, MessageSquare, User, CheckCircle, XCircle } from 'lucide-react';
+import { MessageCircle, Send } from 'lucide-react';
 import type { ChatMessage, Conversation } from './ChatTypes';
-import type { User as ChatUser } from '../services/auth';
 import closeIcon from '../assets/chat-close.png';
 import './Chat.css';
 
 interface ChatPanelProps {
   isGroupChat: boolean;
-  setIsGroupChat: (value: boolean) => void;
   messages: ChatMessage[];
   inputMessage: string;
   setInputMessage: (value: string) => void;
-  receiverId: string;
-  setReceiverId: (value: string) => void;
   roomId: string;
-  setRoomId: (value: string) => void;
   error: string;
   isSending: boolean;
-  receiverValidation: 'valid' | 'invalid' | null;
-  isValidating: boolean;
   selectedConversation: Conversation | null;
   currentUserId: string;
   currentUserName: string;
   onSendMessage: () => void;
-  onReceiverKeyDown: (e: React.KeyboardEvent) => void;
-  onRoomIdKeyDown: (e: React.KeyboardEvent) => void;
   onClose: () => void;
-  userSuggestions?: ChatUser[];
-  onSelectUserSuggestion?: (user: ChatUser) => void;
 }
 
 export function ChatPanel({
   isGroupChat,
-  setIsGroupChat,
   messages,
   inputMessage,
   setInputMessage,
-  receiverId,
-  setReceiverId,
   roomId,
-  setRoomId,
   error,
   isSending,
-  receiverValidation,
-  isValidating,
   selectedConversation,
   currentUserId,
   currentUserName,
   onSendMessage,
-  onReceiverKeyDown,
-  onRoomIdKeyDown,
   onClose,
-  userSuggestions,
-  onSelectUserSuggestion,
 }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -86,72 +65,10 @@ export function ChatPanel({
           </div>
         </div>
         <div className="chat-header-actions">
-          <button 
-            className={`mode-btn ${!isGroupChat ? 'active' : ''}`}
-            onClick={() => setIsGroupChat(false)}
-            title="1:1 채팅으로 전환"
-          >
-            <User size={18} />
-            <span className="mode-label">1:1</span>
-          </button>
-          <button 
-            className={`mode-btn ${isGroupChat ? 'active' : ''}`}
-            onClick={() => setIsGroupChat(true)}
-            title="그룹 채팅으로 전환"
-          >
-            <MessageSquare size={18} />
-            <span className="mode-label">그룹</span>
-          </button>
           <button className="close-btn" onClick={onClose} title="채팅 닫기">
             <img src={closeIcon} alt="닫기" className="chat-close-icon" />
           </button>
         </div>
-      </div>
-
-      <div className="chat-settings">
-        {isGroupChat ? (
-          <input
-            type="text"
-            placeholder="방 ID 입력 후 Enter (기본: general)"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
-            onKeyDown={onRoomIdKeyDown}
-            className="chat-input"
-          />
-        ) : (
-          <div className="receiver-input-wrapper">
-            <input
-              type="text"
-              placeholder="받는 사람 ID 또는 닉네임 입력 후 Enter"
-              value={receiverId}
-              onChange={(e) => { setReceiverId(e.target.value); }}
-              onKeyDown={onReceiverKeyDown}
-              className="chat-input"
-            />
-            {isValidating && <span className="receiver-validation-loading">...</span>}
-            {receiverValidation === 'valid' && <CheckCircle size={18} className="receiver-valid-icon" />}
-            {receiverValidation === 'invalid' && <XCircle size={18} className="receiver-invalid-icon" />}
-            {!isGroupChat && userSuggestions && onSelectUserSuggestion && userSuggestions.length > 0 && (
-              <div className="user-suggestions">
-                {userSuggestions.map((u) => (
-                  <button
-                    type="button"
-                    key={u.id}
-                    className="user-suggestion-item"
-                    onClick={() => onSelectUserSuggestion(u)}
-                  >
-                    <span className="user-suggestion-name">
-                      {u.nickname || u.username}
-                    </span>
-                    <span className="user-suggestion-username">
-                      @{u.username}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {error && (
@@ -163,9 +80,9 @@ export function ChatPanel({
       <div className="chat-messages">
         {messages.length === 0 ? (
           <div className="chat-empty">
-            {isGroupChat 
+            {isGroupChat
               ? `그룹 "${roomId}"로 메시지를 보내보세요`
-              : '상대방 ID를 입력하고 메시지를 보내보세요'}
+              : '왼쪽에서 대화상대를 선택하고 메시지를 보내보세요'}
           </div>
         ) : (
           messages.map((msg) => (
@@ -176,9 +93,9 @@ export function ChatPanel({
               <div className="message-sender">{msg.senderName}</div>
               <div className="message-content">{msg.content}</div>
               <div className="message-time">
-                {new Date(msg.timestamp).toLocaleTimeString('ko-KR', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
+                {new Date(msg.timestamp).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
               </div>
             </div>
@@ -197,8 +114,8 @@ export function ChatPanel({
           className="chat-message-input"
           disabled={isSending}
         />
-        <button 
-          className="send-btn" 
+        <button
+          className="send-btn"
           onClick={onSendMessage}
           disabled={isSending}
         >

@@ -64,42 +64,12 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
           });
         });
         subscriptionsRef.current.push(directSub);
-
-        if (roomId) {
-          const groupSub = stompClient.subscribe(`/topic/group/${roomId}`, (message: Stomp.Message) => {
-            const receivedMessage = JSON.parse(message.body);
-            setMessages(prev => [...prev, receivedMessage]);
-
-            const groupRoomId = receivedMessage.roomId;
-            setConversations(prev => {
-              const exists = prev.find(c => c.id === groupRoomId && c.type === 'group');
-              if (exists) {
-                return prev.map(c =>
-                  c.id === groupRoomId && c.type === 'group'
-                    ? { ...c, lastMessage: receivedMessage.content, timestamp: receivedMessage.timestamp }
-                    : c
-                );
-              }
-              return [
-                ...prev,
-                {
-                  id: groupRoomId,
-                  name: groupRoomId,
-                  type: 'group',
-                  lastMessage: receivedMessage.content,
-                  timestamp: receivedMessage.timestamp,
-                },
-              ];
-            });
-          });
-          subscriptionsRef.current.push(groupSub);
-        }
       },
       (error: string) => {
         console.error('STOMP error:', error);
       }
     );
-  }, [currentUserId, roomId]);
+  }, [currentUserId]);
 
   const disconnectWebSocket = useCallback(() => {
     subscriptionsRef.current.forEach(sub => sub.unsubscribe());
@@ -191,18 +161,42 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
 
   useEffect(() => {
     if (stompClientRef.current && isGroupChat && roomId) {
-      const existingGroupSub = subscriptionsRef.current.find(sub =>
+      // 그룹 topic 구독은 여기서만 관리 (중복 구독 방지)
+      const existingGroupSubs = subscriptionsRef.current.filter(sub =>
         sub.destination?.includes('/topic/group/')
       );
-      if (existingGroupSub) {
-        existingGroupSub.unsubscribe();
-      }
+      existingGroupSubs.forEach(sub => sub.unsubscribe());
+      subscriptionsRef.current = subscriptionsRef.current.filter(
+        sub => !sub.destination?.includes('/topic/group/')
+      );
 
       const groupSub = stompClientRef.current.subscribe(
         `/topic/group/${roomId}`,
         (message: Stomp.Message) => {
           const receivedMessage = JSON.parse(message.body);
           setMessages(prev => [...prev, receivedMessage]);
+
+          const groupRoomId = receivedMessage.roomId || roomId;
+          setConversations(prev => {
+            const exists = prev.find(c => c.id === groupRoomId && c.type === 'group');
+            if (exists) {
+              return prev.map(c =>
+                c.id === groupRoomId && c.type === 'group'
+                  ? { ...c, lastMessage: receivedMessage.content, timestamp: receivedMessage.timestamp }
+                  : c
+              );
+            }
+            return [
+              ...prev,
+              {
+                id: groupRoomId,
+                name: groupRoomId,
+                type: 'group',
+                lastMessage: receivedMessage.content,
+                timestamp: receivedMessage.timestamp,
+              },
+            ];
+          });
         }
       );
       subscriptionsRef.current.push(groupSub);
@@ -248,6 +242,8 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       id: trimmed,
       name: trimmed,
       type: 'direct',
+      lastMessage: '',
+      timestamp: new Date().toISOString()
     };
 
     setSelectedConversation(prev => {
@@ -261,10 +257,12 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       if (prev.find(c => c.id === newConv.id && c.type === 'direct')) {
         return prev;
       }
-      return [...prev, newConv];
+      return [newConv, ...prev];
     });
 
-    setMessages([]);
+    setSelectedConversation(newConv);
+    setReceiverId(trimmed); // 입력창 연동
+    setIsGroupChat(false);
 
     const token = localStorage.getItem('token');
     try {
@@ -273,14 +271,16 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       });
       if (response.ok) {
         const oldMessages = await response.json();
-        if (oldMessages.length > 0) {
-          setMessages(
-            oldMessages.map((msg: ChatMessage) => ({
-              ...msg,
-              timestamp: msg.timestamp,
-            }))
-          );
-        }
+        const normalizedMessages: ChatMessage[] =
+          oldMessages.length > 0
+            ? oldMessages.map((msg: ChatMessage) => ({
+                ...msg,
+                timestamp: msg.timestamp,
+              }))
+            : [];
+        setMessages(normalizedMessages);
+      } else {
+        setMessages([]);
       }
     } catch (err) {
       console.error('Failed to load messages:', err);
@@ -300,19 +300,40 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
   const handleRoomIdKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      const rid = roomId.trim() || 'general';
       const newConv: Conversation = {
-        id: roomId.trim() || 'general',
-        name: roomId.trim() || 'general',
+        id: rid,
+        name: rid,
         type: 'group',
+        lastMessage: '',
+        timestamp: new Date().toISOString()
       };
-      setSelectedConversation(newConv);
+
       setConversations(prev => {
         if (prev.find(c => c.id === newConv.id && c.type === 'group')) {
           return prev;
         }
         return [...prev, newConv];
       });
+
+      setSelectedConversation(newConv);
       setMessages([]);
+
+      const token = localStorage.getItem('token');
+      if (token) {
+        fetch('/api/chat/join', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            senderId: currentUserId,
+            senderName: currentUserName,
+            roomId: rid,
+          }),
+        }).catch((err) => console.error('Failed to join group room:', err));
+      }
     }
   };
 
@@ -325,7 +346,6 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       setIsGroupChat(false);
       setReceiverId(conv.id);
     }
-    setMessages([]);
 
     const token = localStorage.getItem('token');
     try {
@@ -341,9 +361,9 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       }
       if (response.ok) {
         const oldMessages = await response.json();
-        if (oldMessages.length > 0) {
-          setMessages(oldMessages);
-        }
+        setMessages(oldMessages.length > 0 ? oldMessages : []);
+      } else {
+        setMessages([]);
       }
     } catch (err) {
       console.error('Failed to load messages:', err);
@@ -407,16 +427,20 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       });
 
       if (response.ok) {
-        const newMessage: ChatMessage = {
-          messageId: Date.now().toString(),
-          senderId: currentUserId,
-          senderName: currentUserName,
-          content: inputMessage,
-          type: 'CHAT',
-          timestamp: new Date().toISOString(),
-          ...(isGroupChat ? { roomId } : { receiverId: receiverId.trim() }),
-        };
-        setMessages(prev => [...prev, newMessage]);
+        // 그룹 채팅은 서버 broadcast(WebSocket)로 다시 수신되므로
+        // 여기서 optimistic append 하면 같은 내용이 중복 표시될 수 있음.
+        if (!isGroupChat) {
+          const newMessage: ChatMessage = {
+            messageId: Date.now().toString(),
+            senderId: currentUserId,
+            senderName: currentUserName,
+            content: inputMessage,
+            type: 'CHAT',
+            timestamp: new Date().toISOString(),
+            receiverId: receiverId.trim(),
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
         setInputMessage('');
 
         const targetId = isGroupChat ? roomId : receiverId.trim();
@@ -473,7 +497,6 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
     receiverValidation,
     isValidating,
     filteredUserSuggestions,
-    receiverValidation,
     setReceiverValidation,
     userList,
     // actions
