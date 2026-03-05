@@ -3,6 +3,14 @@ import { authService, type User } from '../services/auth';
 import type { ChatMessage, Conversation } from './ChatTypes';
 import Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
+import { API_BASE_URL } from '../config';
+
+const getWsUrl = () => {
+  if (import.meta.env.PROD) {
+    return import.meta.env.VITE_WS_URL_PROD || '';
+  }
+  return import.meta.env.VITE_WS_URL_DEV || '';
+};
 
 interface UseChatCoreParams {
   currentUserId: string;
@@ -30,7 +38,8 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
     if (!currentUserId) return;
 
     const token = localStorage.getItem('token');
-    const socket = new SockJS('/ws');
+    const wsUrl = getWsUrl();
+    const socket = new SockJS(wsUrl || '/ws');
     const stompClient = Stomp.over(socket);
     stompClientRef.current = stompClient;
 

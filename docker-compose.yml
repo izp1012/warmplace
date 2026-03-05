@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - warmplace-network
+
+  backend:
+    image: warmplace-backend:latest
+    ports:
+      - "8081:8081"
+    networks:
+      - warmplace-network
+
+networks:
+  warmplace-network:
+    driver: bridge

@@ -1,6 +1,7 @@
 import type { Post } from '../types';
+import { API_BASE_URL } from '../config';
 
-const API_URL = 'http://localhost:8081/api/posts';
+const API_URL = `${API_BASE_URL}/api/posts`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');

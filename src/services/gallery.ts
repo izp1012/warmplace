@@ -1,6 +1,7 @@
 import type { Gallery } from '../types';
+import { API_BASE_URL } from '../config';
 
-const API_URL = 'http://localhost:8081/api/galleries';
+const API_URL = `${API_BASE_URL}/api/galleries`;
 
 export async function fetchGalleries(): Promise<Gallery[]> {
   const res = await fetch(API_URL);

@@ -1,6 +1,7 @@
 import type { Comment } from '../types';
+import { API_BASE_URL } from '../config';
 
-const API_URL = 'http://localhost:8081/api/comments';
+const API_URL = `${API_BASE_URL}/api/comments`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
