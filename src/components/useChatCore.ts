@@ -3,7 +3,6 @@ import { authService, type User } from '../services/auth';
 import type { ChatMessage, Conversation } from './ChatTypes';
 import Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
-import { API_BASE_URL } from '../config';
 
 const getWsUrl = () => {
   if (import.meta.env.PROD) {
