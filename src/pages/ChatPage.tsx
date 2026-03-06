@@ -136,6 +136,22 @@ export function ChatPage() {
           conversations={conversations as Conversation[]}
           selectedConversation={selectedConversation as Conversation | null}
           onSelectConversation={handleSelectConversation}
+          isGroupChat={isGroupChat}
+          setIsGroupChat={setIsGroupChat}
+          receiverId={receiverId}
+          setReceiverId={setReceiverId}
+          roomId={roomId}
+          setRoomId={setRoomId}
+          receiverValidation={receiverValidation}
+          isValidating={isValidating}
+          onReceiverKeyDown={handleReceiverKeyDown}
+          onRoomIdKeyDown={handleRoomIdKeyDown}
+          userSuggestions={filteredUserSuggestions}
+          onSelectUserSuggestion={(u: User) => {
+            setReceiverId('');
+            handleSelectConversation({ id: u.username, name: u.nickname || u.username, type: 'direct' });
+            openDirectConversation(u.username);
+          }}
         />
       </div>
 
@@ -149,31 +165,17 @@ export function ChatPage() {
         ) : (
           <ChatPanel
             isGroupChat={isGroupChat}
-            setIsGroupChat={setIsGroupChat}
             messages={messages}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
-            receiverId={receiverId}
-            setReceiverId={setReceiverId}
             roomId={roomId}
-            setRoomId={setRoomId}
             error={error}
             isSending={isSending}
-            receiverValidation={receiverValidation}
-            isValidating={isValidating}
             selectedConversation={selectedConversation as Conversation | null}
             currentUserId={currentUserId}
             currentUserName={currentUserName}
             onSendMessage={sendMessage}
-            onReceiverKeyDown={handleReceiverKeyDown}
-            onRoomIdKeyDown={handleRoomIdKeyDown}
             onClose={() => {}}
-            userSuggestions={filteredUserSuggestions}
-            onSelectUserSuggestion={(u: User) => {
-              setReceiverId('');
-              handleSelectConversation({ id: u.username, name: u.nickname || u.username, type: 'direct' });
-              openDirectConversation(u.username);
-            }}
           />
         )}
       </div>
