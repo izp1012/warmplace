@@ -44,7 +44,7 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
 
     const token = localStorage.getItem('token');
     const wsUrl = getWsUrl();
-    const socket = new SockJS(wsUrl || '/ws');
+    const socket = new SockJS(wsUrl);
     const stompClient = Stomp.over(socket);
     stompClientRef.current = stompClient;
 
