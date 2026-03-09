@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Image, X } from 'lucide-react';
 import { galleries } from '../data';
+import { API_BASE_URL } from '../config';
 import './Write.css';
 
 export function Write() {
@@ -50,7 +51,7 @@ export function Write() {
         images: [] as string[],
       };
 
-      const response = await fetch('/api/posts', {
+      const response = await fetch(API_BASE_URL ? `${API_BASE_URL}/api/posts` : '/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

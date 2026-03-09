@@ -3,12 +3,18 @@ import { authService, type User } from '../services/auth';
 import type { ChatMessage, Conversation } from './ChatTypes';
 import Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
+import { API_BASE_URL } from '../config';
 
 const getWsUrl = () => {
   if (import.meta.env.PROD) {
     return import.meta.env.VITE_WS_URL_PROD || '';
   }
   return import.meta.env.VITE_WS_URL_DEV || '';
+};
+
+const apiUrl = (path: string) => {
+  if (!path.startsWith('/')) return API_BASE_URL ? `${API_BASE_URL}/${path}` : `/${path}`;
+  return API_BASE_URL ? `${API_BASE_URL}${path}` : path;
 };
 
 interface UseChatCoreParams {
@@ -111,7 +117,7 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
       if (!token) return;
 
       try {
-        const res = await fetch(`/api/chat/rooms/${currentUserId}`, {
+        const res = await fetch(apiUrl(`/api/chat/rooms/${currentUserId}`), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -274,7 +280,7 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`/api/chat/direct/${currentUserId}/${trimmed}`, {
+      const response = await fetch(apiUrl(`/api/chat/direct/${currentUserId}/${trimmed}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -329,7 +335,7 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
 
       const token = localStorage.getItem('token');
       if (token) {
-        fetch('/api/chat/join', {
+        fetch(apiUrl('/api/chat/join'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -359,11 +365,11 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
     try {
       let response;
       if (conv.type === 'group') {
-        response = await fetch(`/api/chat/group/${conv.id}`, {
+        response = await fetch(apiUrl(`/api/chat/group/${conv.id}`), {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        response = await fetch(`/api/chat/direct/${currentUserId}/${conv.id}`, {
+        response = await fetch(apiUrl(`/api/chat/direct/${currentUserId}/${conv.id}`), {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -425,7 +431,7 @@ export function useChatCore({ currentUserId, currentUserName }: UseChatCoreParam
     setIsSending(true);
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(apiUrl(endpoint), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
